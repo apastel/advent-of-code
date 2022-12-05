@@ -1,0 +1,13 @@
+[project]
+name = "advent"
+version = "1.0.0"
+description = ""
+authors = [
+    {name = "apastel", email = "alex.r.pastel@gmail.com"},
+]
+dependencies = []
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+
+[tool.pdm]
