@@ -1,4 +1,5 @@
 from advent.load import read_input
+import re
 
 data = read_input(group=True)[0]
 
@@ -9,7 +10,7 @@ def calibrate(input_str: str) -> int:
     concat = f"{first}{last}"
     return int(concat)
 
-# print(sum([calibrate(line) for line in data]))
+print(sum([calibrate(line) for line in data]))
 
 mapping = {
     "one": 1,
@@ -24,12 +25,37 @@ mapping = {
 }
 
 def calibrate2(input_str: str) -> int:
-    for x in mapping:
-        input_str.find(x)
-    first = any(x for x in input_str if mapping.get(x))
-    last = any(x for x in input_str if mapping.get(x))
-    concat = f"{first}{last}"
-    print(concat)
+    match_spelled_num = re.findall("(?=(one|two|three|four|five|six|seven|eight|nine))", input_str)
+    
+    try:
+        first_index_digit = [x.isdigit() for x in input_str].index(True)
+    except:
+        first_index_digit = None
+    if (match_spelled_num): #this is a list now
+        first_index_spelled_num = input_str.find(match_spelled_num[0])
+        if (first_index_digit == None or first_index_spelled_num < first_index_digit):
+            first = mapping.get(match_spelled_num[0])
+        else:
+            first = input_str[first_index_digit]
+    else:
+        first = input_str[first_index_digit]
 
-for line in data:
-    calibrate2(line)
+    reverse_input_str = input_str[::-1]
+    try:
+        last_index_digit = [x.isdigit() for x in reverse_input_str].index(True)
+        last_index_digit = abs(last_index_digit - (len(reverse_input_str) - 1))
+    except:
+        last_index_digit = None
+    if (match_spelled_num):
+        last_index_spelled_num = input_str.rfind(match_spelled_num[-1])
+        if (last_index_digit == None or last_index_spelled_num > last_index_digit):
+            last = mapping.get(match_spelled_num[-1])
+        else:
+            last = input_str[last_index_digit]
+    else:
+        last = input_str[last_index_digit]
+
+    concat = f"{first}{last}"
+    return int(concat)
+
+print(sum([calibrate2(line) for line in data]))
