@@ -1,20 +1,26 @@
 from advent.load import read_input
+import math
 
-def is_symbol(grid, row, col):
+# key: position (row, col) of gear
+# value: list of adjacent part numbers
+gear_map = {}
+
+def is_gear(grid, row, col):
   if row < 0 or row >= len(grid) or col < 0 or col >= len(grid[0]):
     return False
-  return grid[row][col] in "!@#$%^&*()-_=+[{]}]|;:,<>/?"
+  return grid[row][col] == "*"
 
-def is_valid_part(grid, row, col):
+def is_valid_part(grid, row, col, gear_pos):
     for i in range(row - 1, row + 2):
         for j in range(col - 1, col + 2):
-            if is_symbol(grid, i, j):
-               return True
-    return False
+            if is_gear(grid, i, j):
+              gear_pos = (i, j)
+              return (True, gear_pos)
+    return (False, gear_pos)
 
 def sum_part_numbers(grid):
-  total_sum = 0
   is_part = False
+  gear_pos = ()
   for row, line in enumerate(grid):
     current_number = ""
     is_part = False
@@ -22,14 +28,31 @@ def sum_part_numbers(grid):
       if char.isdigit():
         current_number += char
         if (not is_part):
-            is_part = is_valid_part(grid, row, col)
-        if is_part and col == len(line) - 1:
-          total_sum += int(current_number)   
+            is_part, gear_pos = is_valid_part(grid, row, col, gear_pos)
+        if is_part and col == len(line) - 1: # part is at the end of the line
+          gear_map.setdefault(gear_pos, []).append(current_number)
       elif current_number:
-        total_sum += int(current_number) if is_part else 0
+        # add/update gear_map with gear position (i, j) and part number (grid[row][col])
+        if is_part:
+          gear_map.setdefault(gear_pos, []).append(current_number)
         current_number = ""
+        gear_pos = ()
         is_part = False
-  return total_sum
+
+def sum_gear_ratios():
+  """
+  For every gear in gear_map, if it has 2 part numbers, multiply them together.
+  Add up all gear ratios.
+  """
+  gear_ratio_sum = 0
+  for gear_pos, parts_list in gear_map.items():
+    #  print(parts_list)
+      if len(parts_list) == 2:
+        gear_ratio_sum += math.prod(int(part) for part in parts_list)
+      else:
+        print(gear_pos, parts_list)
+  return gear_ratio_sum
+  
 
 # Read the input file
 grid = read_input(group=True)[0]
@@ -37,5 +60,5 @@ grid = read_input(group=True)[0]
 # Sum all part numbers
 part_number_sum = sum_part_numbers(grid)
 
-# Print the result
-print(f"Sum of all part numbers: {part_number_sum}")
+
+print(f"Sum of all gear ratios: {sum_gear_ratios()}")
